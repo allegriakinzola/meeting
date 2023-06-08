@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="">
+    <script src="https://unpkg.com/peerjs@1.3.2/dist/peerjs.min.js"></script>
+
+</head>
+<body>
+    
+    <h1>Peer.js Video Chat</h1>
+	<div>
+		<h2>My Video</h2>
+		<video id="my-video" autoplay playsinline></video>
+	</div>
+	<div>
+		<h2>Their Video</h2>
+		<video id="their-video" autoplay playsinline></video>
+	</div>
+	<div>
+		<h2>Create Meeting</h2>
+		<button id="create-meeting-btn">Create Meeting</button>
+		<p>Meeting ID: <span id="meeting-id"></span></p>
+	</div>
+	<div>
+		<h2>Join Meeting</h2>
+		<label for="meeting-id-input">Enter Meeting ID:</label>
+		<input type="text" id="meeting-id-input">
+		<button id="join-meeting-btn">Join Meeting</button>
+	</div>
+	<script src="script.js"></script>
+
+</body>
+</html>
