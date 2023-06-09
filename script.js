@@ -1,9 +1,14 @@
 // Create a new Peer object with a random ID
-const peer = new Peer(Math.random().toString(36).substring(2, 8), );
+const peer = new Peer(Math.random().toString(36).substring(2, 8));
 
 // Get the video elements from the HTML
 const myVideo = document.getElementById("my-video");
 const theirVideo = document.getElementById("their-video");
+
+// Get the chat elements from the HTML
+const chatBox = document.getElementById("chat-box");
+const chatInput = document.getElementById("chat-input");
+const chatSendBtn = document.getElementById("chat-send-btn");
 
 // When the Peer object has an ID assigned to it, log the ID to the console and display it on the page
 peer.on("open", (id) => {
@@ -27,6 +32,23 @@ document.getElementById("join-meeting-btn").addEventListener("click", () => {
 	// When the connection is established, log a message to the console
 	conn.on("open", () => {
 		console.log("Connected to meeting " + meetingID);
+
+		// When we receive a message from the other user, display it in the chat box
+		conn.on("data", (data) => {
+			const message = document.createElement("p");
+			message.textContent = data;
+			chatBox.appendChild(message);
+		});
+
+		// When the user clicks the "Send" button, send the message to the other user
+		chatSendBtn.addEventListener("click", () => {
+			const message = chatInput.value;
+			conn.send(message);
+			const messageElement = document.createElement("p");
+			messageElement.textContent= "Me: " + message;
+			chatBox.appendChild(messageElement);
+			chatInput.value = "";
+		});
 	});
 
 	// When we receive a call from the other user, answer the call and send them our stream
