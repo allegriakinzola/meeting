@@ -1,8 +1,5 @@
 // Create a new Peer object with a random ID
-const peer = new Peer(Math.random().toString(36).substring(2, 8), {'iceServers': [
-    { url: 'stun:stun.l.google.com:19302' },
-    { url: 'turn:homeo@turn.bistri.com:80', credential: 'homeo' }
-  ]} /* Sample servers, please use appropriate ones */);
+const peer = new Peer(Math.random().toString(36).substring(2, 8), );
 
 // Get the video elements from the HTML
 const myVideo = document.getElementById("my-video");
