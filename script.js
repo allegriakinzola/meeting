@@ -1,81 +1,82 @@
-// Create a new Peer object with a random ID
 const peer = new Peer(Math.random().toString(36).substring(2, 8));
 
-
-// Get the video elements from the HTML
 const myVideo = document.getElementById("my-video");
 const theirVideo = document.getElementById("their-video");
-
-// Get the chat elements from the HTML
 const chatBox = document.getElementById("chat-box");
 const chatInput = document.getElementById("chat-input");
 const chatSendBtn = document.getElementById("chat-send-btn");
 
-// When the Peer object has an ID assigned to it, log the ID to the console and display it on the page
+// Ajoutez une variable pour stocker la connexion active
+let activeConnection = null;
+
 peer.on("open", (id) => {
 	console.log("My peer ID is: " + id);
 	document.getElementById("meeting-id").textContent = id;
 });
 
-// When the user clicks the "Create Meeting" button, generate a new ID and set it as the meeting ID
 document.getElementById("create-meeting-btn").addEventListener("click", () => {
 	const meetingID = Math.random().toString(36).substring(2, 8);
 	document.getElementById("meeting-id").textContent = meetingID;
 });
 
-// When the user clicks the "Join Meeting" button, get the meeting ID from the input field and connect to the other user with that ID
+// Lorsque l'utilisateur clique sur le bouton "Join Meeting", récupérez l'ID de la réunion à partir du champ de saisie et connectez-vous à l'autre utilisateur avec cet ID
 document.getElementById("join-meeting-btn").addEventListener("click", () => {
 	const meetingID = document.getElementById("meeting-id-input").value;
 
-	// Connect to the other user with the meeting ID
+	// Connectez-vous à l'autre utilisateur avec l'ID de réunion
 	const conn = peer.connect(meetingID);
 
-	// When the connection is established, log a message to the console
+	// Stockez la connexion active
+	activeConnection = conn;
+
+	// Lorsque la connexion est établie, affichez un message dans la console
 	conn.on("open", () => {
 		console.log("Connected to meeting " + meetingID);
 
-		// When we receive a message from the other user, display it in the chat box
+		// Lorsque nous recevons un message de l'autre utilisateur, affichez-le dans la boîte de chat
 		conn.on("data", (data) => {
 			const message = document.createElement("p");
 			message.textContent = data;
 			chatBox.appendChild(message);
 		});
 
-		// When the user clicks the "Send" button, send the message to the other user
+		// Lorsque l'utilisateur clique sur le bouton "Send", envoyez le message à l'autre utilisateur
 		chatSendBtn.addEventListener("click", () => {
 			const message = chatInput.value;
 			conn.send(message);
 			const messageElement = document.createElement("p");
-			messageElement.textContent= "Me: " + message;
+			messageElement.textContent = "Me: " + message;
 			chatBox.appendChild(messageElement);
 			chatInput.value = "";
 		});
 	});
+});
 
-	// When we receive a call from the other user, answer the call and send them our stream
-	peer.on("call", (call) => {
-		call.answer();
+// Lorsque nous recevons un appel de l'autre utilisateur, répondez à l'appel et envoyez-leur notre flux
+peer.on("call", (call) => {
+	// Répondez à l'appel et envoyez-leur notre flux
+	call.answer();
 
-		// When we receive their stream, set it to the theirVideo element
+	// Lorsque nous recevons leur flux, définissez-le sur l'élément theirVideo
+	call.on("stream", (theirStream) => {
+		theirVideo.srcObject = theirStream;
+	});
+});
+
+// Appelez l'autre utilisateur et envoyez-leur notre flux
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+	.then((stream) => {
+		// Définissez le flux vidéo de l'utilisateur sur l'élément myVideo
+		myVideo.srcObject = stream;
+
+		// Appelez l'autre utilisateur et envoyez-leur notre flux
+		const call = activeConnection.call(meetingID, stream);
+
+		// Lorsque nous recevons leur flux, définissez-le sur l'élément theirVideo
 		call.on("stream", (theirStream) => {
 			theirVideo.srcObject = theirStream;
 		});
+	})
+	.catch((error) => {
+		console.log(error);
 	});
-
-	// Call the other user and send them our stream
-	navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-		.then((stream) => {
-			// Set the user's video stream to the myVideo element
-			myVideo.srcObject = stream;
-
-			const call = peer.call(meetingID, stream);
-
-			// When we receive their stream, set it to the theirVideo element
-			call.on("stream", (theirStream) => {
-				theirVideo.srcObject = theirStream;
-			});
-		})
-		.catch((error) => {
-			console.log(error);
-		});
-});
